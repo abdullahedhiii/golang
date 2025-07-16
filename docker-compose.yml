@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./go-backend
+      dockerfile: Dockerfile
+    container_name: backend
+    ports:
+      - "8000:8000"
+    # depends_on:
+    #   - postgres
+
+  frontend:
+    build:
+      context: ./Bookstore-frontend/frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    ports:
+      - "6600:80"
+    depends_on:
+      - backend

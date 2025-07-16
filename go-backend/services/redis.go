@@ -3,10 +3,10 @@ package caching
 import (
 	"context"
 	"fmt"
+	"reflect"
 	"time"
 
-	"github.com/abdullahedhiii/go-backend/models"
-	redis "github.com/go-redis/redis/v8"
+	"github.com/go-redis/redis/v8"
 )
 
 var (
@@ -16,8 +16,8 @@ var (
 	ctx = context.Background()
 )
 
-func GetBook(id string) (map[string]string, error) {
-	cacheKey := fmt.Sprintf("book:%s", id)
+func GET(prefix, id string) (map[string]string, error) {
+	cacheKey := fmt.Sprintf("%s:%s", prefix, id)
 	res, err := client.HGetAll(ctx, cacheKey).Result()
 	if err != nil || len(res) == 0 {
 		return nil, err
@@ -25,13 +25,27 @@ func GetBook(id string) (map[string]string, error) {
 	return res, nil
 }
 
-func AddBook(book models.Book) {
-	cacheKey := fmt.Sprintf("book:%s", book.ID)
-	_, err := client.HSet(ctx, cacheKey, map[string]interface{}{
-		"Title":  book.Title,
-		"Author": book.Author,
-	}).Result()
-	if err == nil {
-		client.Expire(ctx, cacheKey, 10*time.Minute)
+func PUT(prefix string, id string, data interface{}, ttl time.Duration) error {
+	cacheKey := fmt.Sprintf("%s:%s", prefix, id)
+
+	v := reflect.ValueOf(data)
+	if v.Kind() != reflect.Struct {
+		return fmt.Errorf("SetToCache expects a struct, got %s", v.Kind())
 	}
+
+	fields := make(map[string]interface{})
+	t := v.Type()
+
+	for i := 0; i < v.NumField(); i++ {
+		field := t.Field(i)
+		name := field.Name
+		value := v.Field(i).Interface()
+
+		fields[name] = value
+	}
+
+	if _, err := client.HSet(ctx, cacheKey, fields).Result(); err != nil {
+		return err
+	}
+	return client.Expire(ctx, cacheKey, ttl).Err()
 }

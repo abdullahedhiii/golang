@@ -104,7 +104,7 @@ func GetBook(c *gin.Context) {
 
 	var book models.Book
 
-	res, err := caching.GetBook(id)
+	res, err := caching.GET("book", id)
 	if err == nil && len(res) > 0 {
 		fmt.Println("Cache hit for book ID:", id)
 		book.ID = id
@@ -121,7 +121,14 @@ func GetBook(c *gin.Context) {
 	}
 
 	fmt.Println("Cache miss for book ID:", id)
-	caching.AddBook(book)
+	err = caching.PUT("book", id, book, 10*time.Minute)
+	if err != nil {
+		fmt.Println("Error caching book:", err)
+		c.JSON(404, gin.H{"error": "Error caching book"})
 
-	c.JSON(200, book)
+	} else {
+		fmt.Println("Book cached successfully for ID:", id)
+		c.JSON(200, book)
+
+	}
 }
