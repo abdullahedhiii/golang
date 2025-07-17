@@ -80,7 +80,7 @@ export default {
           }, 2000)
           
       } catch (error) {
-        const errorData = await response.data
+        const errorData =error.response ? error.response.data : {}
           this.error = errorData.message || 'Registration failed'
         
       } finally {

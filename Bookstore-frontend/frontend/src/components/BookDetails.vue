@@ -56,7 +56,6 @@ export default {
 
       this.book = await response.data
     } catch (err) {
-      const data = await response.data
       this.error = err.message
     } finally {
       this.loading = false

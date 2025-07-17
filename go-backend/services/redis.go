@@ -3,6 +3,7 @@ package caching
 import (
 	"context"
 	"fmt"
+	"os"
 	"reflect"
 	"time"
 
@@ -11,7 +12,7 @@ import (
 
 var (
 	client = redis.NewClient(&redis.Options{
-		Addr: "localhost:6379",
+		Addr: os.Getenv("REDIS_URL"),
 	})
 	ctx = context.Background()
 )

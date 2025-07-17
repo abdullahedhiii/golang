@@ -1,33 +1,24 @@
 version: '3.9'
+
 services:
-  db:
-    image: postgres:15
-    environment:
-      POSTGRES_DB: BookStore
-      POSTGRES_USER: abdullah
-      POSTGRES_PASSWORD: edhi
-    ports:
-      - "5432:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    networks:
-      - goapp
 
   backend:
-    build: ./backend
+    build: ./go-backend
     environment:
-      DB_HOST: db
+      DB_HOST: host.docker.internal
       DB_PORT: 5432
       DB_USER: abdullah
       DB_PASSWORD: edhi
       DB_NAME: BookStore
-    depends_on:
-      - db
+    working_dir: /app
+    ports: 
+      - "8080:8080"
     networks:
       - goapp
 
+
   frontend:
-    build: ./frontend
+    build: ./Bookstore-frontend/frontend
     ports:
       - "3000:80"
     depends_on:

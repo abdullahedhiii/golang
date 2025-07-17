@@ -2,7 +2,7 @@ import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
 
 const api = axios.create({
-  baseURL: "http://localhost:8080",
+  baseURL: "http://backend.127.0.0.1.sslip.io",
 });
 
 api.interceptors.request.use((config) => {
