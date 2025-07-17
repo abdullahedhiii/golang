@@ -1,0 +1,117 @@
+postgresql:
+ fullnameOverride: postgres
+   
+ auth:
+    username: abdullah
+    password: edhi
+    postgresPassword: edhi
+    database: BookStore
+
+ primary:
+   persistence:
+    enabled: true
+    storageClass: ""
+    size: 10Gi
+
+   podSecurityContext:
+    enabled: true
+    fsGroup: 1001
+
+   containerSecurityContext:
+    enabled: true
+    runAsUser: 1001
+
+   service:
+    type: ClusterIP
+
+ volumePermissions:
+  enabled: true
+
+ metrics:
+  readinessProbe:
+   enabled: true
+   customCommand:
+    command:
+      - /bin/sh
+      - -c
+      - pg_isready -U abdullah -d mydb_1
+
+  livenessProbe:
+   enabled: true
+   customCommand:
+    command:
+      - /bin/sh
+      - -c
+      - pg_isready -U abdullah -d mydb_1
+
+redis:
+  nameOverride: redis
+  fullnameOverride: redis
+  auth:
+    enabled: false 
+  architecture: standalone
+
+  master:
+    persistence:
+      enabled: true
+      size: 2Gi
+    service:
+      type: ClusterIP
+
+
+frontend:
+  deploy:
+    name: frontend
+    replicas: 1
+    image: abdullahedhii/myimages:frontend-image
+    imagePullPolicy: Always
+    containerPort: 80
+
+  service:
+    name: frontend-service
+    type: ClusterIP
+    protocol: TCP
+    port: 3000
+    targetPort: 80
+
+backend:
+  config:
+    name: backend-config
+    dbHost: postgres
+    dbPort: "5432"
+    dbUser: abdullah
+    dbPassword: edhi
+    dbName: BookStore
+    redisUrl: redis-master:6379
+
+  deploy:
+    name: backend
+    replicas: 1
+    image: abdullahedhii/myimages:backend-image
+    imagePullPolicy: Always
+    containerPort: 8080
+
+  service:
+    name: backend-service
+    type: ClusterIP
+    protocol: TCP
+    portName: http
+    port: 8080
+    targetPort: 8080
+
+ingress:
+  enabled: true
+  name: app-ingress
+  rules:
+    - host: frontend.127.0.0.1.sslip.io
+      paths:
+        - path: /
+          pathType: Prefix
+          serviceName: frontend-service
+          servicePort: 3000
+    - host: backend.127.0.0.1.sslip.io
+      paths:
+        - path: /
+          pathType: Prefix
+          serviceName: backend-service
+          servicePort: 8080
