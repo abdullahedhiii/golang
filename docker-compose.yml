@@ -1,22 +1,42 @@
-version: '3.8'
-
+version: '3.9'
 services:
-  backend:
-    build:
-      context: ./go-backend
-      dockerfile: Dockerfile
-    container_name: backend
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: BookStore
+      POSTGRES_USER: abdullah
+      POSTGRES_PASSWORD: edhi
     ports:
-      - "8000:8000"
-    # depends_on:
-    #   - postgres
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - goapp
+
+  backend:
+    build: ./backend
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: abdullah
+      DB_PASSWORD: edhi
+      DB_NAME: BookStore
+    depends_on:
+      - db
+    networks:
+      - goapp
 
   frontend:
-    build:
-      context: ./Bookstore-frontend/frontend
-      dockerfile: Dockerfile
-    container_name: frontend
+    build: ./frontend
     ports:
-      - "6600:80"
+      - "3000:80"
     depends_on:
       - backend
+    networks:
+      - goapp
+
+volumes:
+  pgdata:
+
+networks:
+  goapp:

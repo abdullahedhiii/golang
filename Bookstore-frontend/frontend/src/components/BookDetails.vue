@@ -21,6 +21,8 @@
 </template>
 
 <script>
+import api from "../utils/axios";
+
 export default {
   name: 'BookDetails',
   data() {
@@ -50,17 +52,11 @@ export default {
     const bookId = this.$route.params.id
 
     try {
-      const response = await fetch(`http://localhost:8080/books/${bookId}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-        }
-      })
-      if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.error || 'Failed to fetch book')
-      }
-      this.book = await response.json()
+      const response = await api.get(`/books/${bookId}`)
+
+      this.book = await response.data
     } catch (err) {
+      const data = await response.data
       this.error = err.message
     } finally {
       this.loading = false

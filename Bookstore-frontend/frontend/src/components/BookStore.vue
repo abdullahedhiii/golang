@@ -29,6 +29,8 @@
 </template>
 
 <script>
+import api from "../utils/axios";
+
 export default {
   name: 'BookStore',
   data() {
@@ -54,20 +56,12 @@ export default {
       this.error = ''
       
       try {
-        const response = await fetch('http://localhost:8080/books', {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-          }
-        })
-        
-        if (response.ok) {
-        
-          this.books = await response.json()
-        } else {
-          this.error = 'Failed to fetch books'
-        }
+        const response = await api.get('/books')
+          this.books = await response.data
+      
       } catch (error) {
-        this.error = 'Network error. Please try again.'
+        this.error = 'Failed to fetch books'
+
       } finally {
         this.loading = false
       }

@@ -36,6 +36,8 @@
 </template>
 
 <script>
+import api from "../utils/axios";
+
 export default {
   name: 'Login',
   data() {
@@ -54,24 +56,19 @@ export default {
       this.error = ''
       
       try {
-        const response = await fetch('http://localhost:8080/login', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(this.credentials)
-        })
-        
-        if (response.ok) {
-          const data = await response.json()
+        const response = await api.post('/login', 
+          this.credentials
+        )
+          const data = await response.data
           localStorage.setItem('authToken', data.token || 'authenticated')
           this.$router.push('/books')
-        } else {
-          const errorData = await response.json()
-          this.error = errorData.message || 'Login failed'
-        }
+    
       } catch (error) {
-        this.error = 'Network error. Please try again.'
+        if (error.response && error.response.data) {
+           this.error = error.response.data.message || 'Login failed'
+        } else {
+          this.error = 'Network error. Please try again.'
+         }
       } finally {
         this.loading = false
       }

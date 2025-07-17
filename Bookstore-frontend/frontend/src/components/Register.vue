@@ -47,6 +47,8 @@
 </template>
 
 <script>
+import api from "../utils/axios";
+
 export default {
   name: 'Register',
   data() {
@@ -68,25 +70,19 @@ export default {
       this.success = ''
       
       try {
-        const response = await fetch('http://localhost:8080/register', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(this.userData)
-        })
-        
-        if (response.ok) {
+        const response = await api.post('/register', 
+         this.userData
+        )
+
           this.success = 'Registration successful! Redirecting to login...'
           setTimeout(() => {
             this.$router.push('/login')
           }, 2000)
-        } else {
-          const errorData = await response.json()
-          this.error = errorData.message || 'Registration failed'
-        }
+          
       } catch (error) {
-        this.error = 'Network error. Please try again.'
+        const errorData = await response.data
+          this.error = errorData.message || 'Registration failed'
+        
       } finally {
         this.loading = false
       }
