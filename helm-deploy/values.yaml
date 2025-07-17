@@ -34,7 +34,7 @@ postgresql:
     command:
       - /bin/sh
       - -c
-      - pg_isready -U abdullah -d mydb_1
+      - pg_isready -U abdullah -d BookStore
 
   livenessProbe:
    enabled: true
@@ -42,7 +42,7 @@ postgresql:
     command:
       - /bin/sh
       - -c
-      - pg_isready -U abdullah -d mydb_1
+      - pg_isready -U abdullah -d BookStore
 
 redis:
   nameOverride: redis
